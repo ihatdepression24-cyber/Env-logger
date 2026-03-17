@@ -22,30 +22,6 @@ async def upload_to_pastefy(content: str, filename: str) -> str | None:
     headers = {
         "Authorization": f"Bearer {PASTEFY_TOKEN}",
         "Content-Type": "application/json",
-import discord
-import aiohttp
-import subprocess
-import tempfile
-import os
-import time
-from dotenv import load_dotenv
-
-load_dotenv()
-
-BOT_TOKEN     = os.getenv("BOT_TOKEN")
-PASTEFY_TOKEN = os.getenv("PASTEFY_TOKEN")
-LUADEC_PATH   = "./luadec"
-
-intents = discord.Intents.default()
-intents.message_content = True
-client = discord.Client(intents=intents)
-
-
-async def upload_to_pastefy(content: str, filename: str) -> str | None:
-    url = "https://pastefy.app/api/v2/paste"
-    headers = {
-        "Authorization": f"Bearer {PASTEFY_TOKEN}",
-        "Content-Type": "application/json",
     }
     payload = {
         "title": filename,
@@ -163,4 +139,3 @@ async def on_message(message: discord.Message):
 
 
 client.run(BOT_TOKEN)
-Copy only this, replace everything in your bot.py on GitHub, save and Railway will redeploy!
