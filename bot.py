@@ -22,6 +22,30 @@ async def upload_to_pastefy(content: str, filename: str) -> str | None:
     headers = {
         "Authorization": f"Bearer {PASTEFY_TOKEN}",
         "Content-Type": "application/json",
+import discord
+import aiohttp
+import subprocess
+import tempfile
+import os
+import time
+from dotenv import load_dotenv
+
+load_dotenv()
+
+BOT_TOKEN     = os.getenv("BOT_TOKEN")
+PASTEFY_TOKEN = os.getenv("PASTEFY_TOKEN")
+LUADEC_PATH   = "./luadec"
+
+intents = discord.Intents.default()
+intents.message_content = True
+client = discord.Client(intents=intents)
+
+
+async def upload_to_pastefy(content: str, filename: str) -> str | None:
+    url = "https://pastefy.app/api/v2/paste"
+    headers = {
+        "Authorization": f"Bearer {PASTEFY_TOKEN}",
+        "Content-Type": "application/json",
     }
     payload = {
         "title": filename,
@@ -80,13 +104,11 @@ async def on_message(message: discord.Message):
     raw_bytes = None
     filename  = "dump.lua"
 
-    # 1. Attachment on the command message
     if message.attachments:
         att = message.attachments[0]
         filename  = att.filename
         raw_bytes = await fetch_url(att.url)
 
-    # 2. Replied-to message has an attachment
     elif message.reference:
         ref = await message.channel.fetch_message(message.reference.message_id)
         if ref.attachments:
@@ -94,7 +116,6 @@ async def on_message(message: discord.Message):
             filename  = att.filename
             raw_bytes = await fetch_url(att.url)
         else:
-            # Check for a URL in the replied message
             words = ref.content.split()
             for word in words:
                 if word.startswith("http"):
@@ -104,7 +125,6 @@ async def on_message(message: discord.Message):
                         filename += ".lua"
                     break
 
-    # 3. URL in the command message itself
     else:
         words = message.content.split()
         for word in words:
@@ -116,10 +136,9 @@ async def on_message(message: discord.Message):
                 break
 
     if not raw_bytes:
-        await message.reply(" No Lua file / link found.")
+        await message.reply("❌ No Lua file found. Attach a file, reply to one, or provide a URL.")
         return
 
-    # Write to temp file and run luadec
     with tempfile.NamedTemporaryFile(suffix=".lua", delete=False) as tmp:
         tmp.write(raw_bytes)
         tmp_path = tmp.name
@@ -129,10 +148,8 @@ async def on_message(message: discord.Message):
     finally:
         os.unlink(tmp_path)
 
-    # Upload to Pastefy
     pastefy_url = await upload_to_pastefy(output, filename)
 
-    # Write result to a temp file for Discord attachment
     with tempfile.NamedTemporaryFile(suffix=".lua", delete=False, mode="w", encoding="utf-8") as out:
         out.write(output)
         out_path = out.name
@@ -146,6 +163,4 @@ async def on_message(message: discord.Message):
 
 
 client.run(BOT_TOKEN)
-Paste this into bot.py, then fill in your .env:
-BOT_TOKEN=your_discord_bot_token
-PASTEFY_TOKEN=your_pastefy_api_key
+Copy only this, replace everything in your bot.py on GitHub, save and Railway will redeploy!
