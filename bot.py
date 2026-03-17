@@ -10,7 +10,7 @@ load_dotenv()
 
 BOT_TOKEN     = os.getenv("BOT_TOKEN")
 PASTEFY_TOKEN = os.getenv("PASTEFY_TOKEN")
-LUADEC_PATH   = "./luadec"
+LUADEC_PATH   = "/usr/local/bin/luadec"
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -112,7 +112,7 @@ async def on_message(message: discord.Message):
                 break
 
     if not raw_bytes:
-        await message.reply("❌ No Lua file found. Attach a file, reply to one, or provide a URL.")
+        await message.reply("No Lua file / link found.")
         return
 
     with tempfile.NamedTemporaryFile(suffix=".lua", delete=False) as tmp:
