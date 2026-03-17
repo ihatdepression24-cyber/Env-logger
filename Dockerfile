@@ -7,10 +7,13 @@ RUN apt-get update && apt-get install -y \
     liblua5.1-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/viruscamp/luadec.git /luadec \
-    && cd /luadec/lua-5.1 && make linux \
-    && cd /luadec && make LUA_VERSION=5.1 \
-    && cp /luadec/luadec /usr/local/bin/luadec
+RUN git clone https://github.com/viruscamp/luadec.git /luadec && \
+    cd /luadec/lua-5.1 && \
+    make linux && \
+    cd /luadec && \
+    make LUA_VERSION=5.1 && \
+    cp /luadec/luadec /usr/local/bin/luadec || \
+    (cd /luadec/lua-5.1 && make posix && cd /luadec && make LUA_VERSION=5.1 && cp /luadec/luadec /usr/local/bin/luadec)
 
 WORKDIR /app
 COPY requirements.txt .
